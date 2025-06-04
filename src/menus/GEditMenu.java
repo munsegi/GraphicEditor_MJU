@@ -1,4 +1,4 @@
-package GraphicEditor;
+package menus;
 
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
