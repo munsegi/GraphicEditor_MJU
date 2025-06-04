@@ -1,1 +1,16 @@
+# Eclipse
+.classpath
+.project
+.settings/
+
+# build 폴더(예: bin, out 등)
 /bin/
+/out/
+
+# OS별 임시파일
+*.log
+*.tmp
+*.DS_Store
+
+# 기타
+*.class
