@@ -58,7 +58,7 @@ public class GFileMenu extends JMenu {
         if (!folder.exists()) {
             boolean success = folder.mkdirs();
             if (!success) {
-                // 폴더 생성에 실패했을 때의 처리 (로그 출력 등)
+                // 폴더 생성에 실패했을 때의 처리 
                 System.err.println("경고: " + baseDirectory + " 폴더 생성에 실패했습니다.");
             }
         }
