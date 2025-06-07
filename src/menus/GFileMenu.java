@@ -28,13 +28,40 @@ import global.GConstants.Gmainframe.EFileMenuItem;
 public class GFileMenu extends JMenu {
 	private static final long serialVersionUID = 1L;
 	
-	private File dir; // 디렉토리(폴더)도 사실상 하나의 파일이라고 간주하는것
+	// 디렉토리(폴더)도 사실상 하나의 파일이라고 간주하는것
+	
 	private File file;
+	private JFileChooser GfileChooser;
+	private String baseDirectory;
 	
 	private GDrawingPanel drawingPanel;
 	
 	public GFileMenu() {
 		super("File");
+		
+		String appData = System.getenv("APPDATA");
+		if (appData == null || appData.isEmpty()) {
+            // 만약 Windows 환경이 아니거나 APPDATA가 비어 있다면
+            appData = System.getProperty("user.home") 
+                    + File.separator + "AppData" 
+                    + File.separator + "Roaming";
+        }
+		
+		baseDirectory = appData + File.separator + "GraphicEditor_MJU";
+		
+		// 해당 폴더가 없으면 생성
+		File folder = new File(baseDirectory);
+		
+		GfileChooser = new JFileChooser(new File(baseDirectory));
+		GfileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        
+        if (!folder.exists()) {
+            boolean success = folder.mkdirs();
+            if (!success) {
+                // 폴더 생성에 실패했을 때의 처리 (로그 출력 등)
+                System.err.println("경고: " + baseDirectory + " 폴더 생성에 실패했습니다.");
+            }
+        }
 		
 		ActionHandler actionHandler = new ActionHandler();
 		
@@ -46,7 +73,6 @@ public class GFileMenu extends JMenu {
 		}
 	}
 	public void initialize() {
-		this.dir = new File("C:\\Users\\anstj\\eclipse-workspace\\GraphicEditor_교수님_06-02"); // Constants에 집어넣어야 됨 원래
 		this.file = null;
 	}
 	
@@ -65,13 +91,29 @@ public class GFileMenu extends JMenu {
 	public void open() {
 		System.out.println("open");
 		
+		File openFile = new File(baseDirectory, "File.gvs");
+		
+		//한번도 저장한 적이 없으면 경고를 띄움
+		if (!openFile.exists()) {
+	        JOptionPane.showMessageDialog(
+	            this.drawingPanel, "기본 디렉토리에 File.gvs 파일이 존재하지 않습니다.", "경고",
+	            JOptionPane.WARNING_MESSAGE
+	        );
+	        return;
+	    }
 		try {
-			FileInputStream fileInputStream = new FileInputStream(this.file);
+			FileInputStream fileInputStream = new FileInputStream(openFile);
 			BufferedInputStream bufferedInputStream = new BufferedInputStream(fileInputStream);// 버퍼를 통해 팬딩을 방지 (다른 데이터 세그먼트에 저장)
 			ObjectInputStream objectInputStream = new ObjectInputStream(bufferedInputStream);//
 			
 			this.drawingPanel.setShapes(objectInputStream.readObject()); // 메모리 상의 객체를 파일에 쓸 수 있는 형태로 바꿔줌
+			this.drawingPanel.repaint();
+			
 			objectInputStream.close();
+			
+			this.file = openFile;
+	        this.drawingPanel.setBUpdated(false);
+	        
 		} catch (IOException | ClassNotFoundException e) {
 			e.printStackTrace();
 		} //바이트 배열을 작성함
@@ -80,21 +122,30 @@ public class GFileMenu extends JMenu {
 	
 	public void save() {
 		System.out.println("save");
-		if(this.file == null) {
-			if(!this.saveAS()) {
-				try {
-					FileOutputStream fileOutputStream = new FileOutputStream(this.file); //바이트 배열을 작성해서 this.file에 저장함
-					BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(fileOutputStream);// 버퍼를 통해 팬딩을 방지 (다른 데이터 세그먼트에 저장)
-					ObjectOutputStream objectOutputStream = new ObjectOutputStream(bufferedOutputStream);// 버퍼에 저장된 객체를 파일에 저장하도록 함
-					
-					objectOutputStream.writeObject(this.drawingPanel.getShapes()); // 메모리 상의 객체를 파일에 쓸 수 있는 형태로 바꿔줌
-					objectOutputStream.close();
-					this.drawingPanel.setBUpdated(false);
-					//인스턴스를 자바의 바이트 코드 형태의 배열로 만들어버림
-				} catch (IOException e){
-					e.printStackTrace();
-				}
-			}
+		
+		if (this.file == null) {
+	        File defaultDir = new File(baseDirectory);
+	        
+	        // 기본 디렉토리가 없으면 생성
+	        if (!defaultDir.exists()) {
+	            defaultDir.mkdirs();
+	        }
+
+	        // 기본 파일명을 File.gvs로 지정
+	        this.file = new File(defaultDir, "File.gvs");       
+		}
+		
+		try {
+			FileOutputStream fileOutputStream = new FileOutputStream(this.file); // 바이트 배열을 작성해서 this.file에 저장함
+			BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(fileOutputStream);// 버퍼를 통해 팬딩을 방지 (다른 데이터 세그먼트에저장)
+			ObjectOutputStream objectOutputStream = new ObjectOutputStream(bufferedOutputStream);// 버퍼에 저장된 객체를 파일에저장하도록 함
+
+			objectOutputStream.writeObject(this.drawingPanel.getShapes()); // 메모리 상의 객체를 파일에 쓸 수 있는 형태로 바꿔줌
+			objectOutputStream.close();
+			this.drawingPanel.setBUpdated(false);
+			// 인스턴스를 자바의 바이트 코드 형태의 배열로 만들어버림
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 		
 	}
@@ -103,18 +154,16 @@ public class GFileMenu extends JMenu {
 		System.out.println("saveAS");
 		
 		boolean bCancel = false;
-		JFileChooser chooser = new JFileChooser(this.dir);
-		chooser.setDialogTitle("Save As");
+		GfileChooser.setDialogTitle("Save As");
 
-		chooser.setSelectedFile(this.file);
+		GfileChooser.setSelectedFile(this.file);
 		FileNameExtensionFilter filter = new FileNameExtensionFilter("Graphics Data", "gvs");
-		chooser.setFileFilter(filter);
+		GfileChooser.setFileFilter(filter);
 		
-		int returnVal = chooser.showSaveDialog(this.drawingPanel);
+		int returnVal = GfileChooser.showSaveDialog(this.drawingPanel);
 		
 		if(returnVal == JFileChooser.APPROVE_OPTION) {
-			this.dir  = chooser.getCurrentDirectory();
-			this.file = chooser.getSelectedFile();
+			this.file = GfileChooser.getSelectedFile();
 			this.save();
 		} else {
 			bCancel = true;
