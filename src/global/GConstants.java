@@ -1,108 +1,210 @@
 package global;
 
 import java.awt.Cursor;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
+
 import Shapes.GEllipse;
-import Shapes.GLine;
 import Shapes.GPolygon;
 import Shapes.GRectangle;
 import Shapes.GShape;
-import Shapes.GTriangle;
 import Shapes.GShape.EPoints;
 
-public class GConstants {
-	public final class Gmainframe{
-		public final static int START_X = 100;
-		public final static int START_Y = 200;
-		
-		public final static int START_W = 600;
-		public final static int START_H = 400;
-		
-		public enum EShapeTool{ // 순서와 값을 가진 숫자들이자 객체
+public final class GConstants {
+	
+	static {
+		initialize();
+    }
+	
+	public GConstants() {
 
-			eSelect("select", EPoints.e2P, GRectangle.class),
-			eRectangle("rectangle", EPoints.e2P, GRectangle.class), // 자기가 자신의 객체를 만듦. 클래스가 아님.
-			eEllipse("Ellipse", EPoints.e2P, GEllipse.class), // 프로그램이 실행되면서 4개의 객체가 new가 된 것임.
-			eLine("Line", EPoints.e2P, GLine.class), 
-			eTriangle("triangle", EPoints.e2P, GTriangle.class), 
-			ePolygon("Polygon", EPoints.eNP, GPolygon.class);
+	}
+
+	
+	private static void initialize() {
+		try (InputStream is = GConstants.class.getResourceAsStream("/global/config.xml")) {
+	        if (is == null) {
+	            throw new IllegalStateException("config.xml not found");
+	        }
+	        readFromFile(is);
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+	}
+
+	public static void readFromFile(InputStream fileName) {
+		try {
+			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+			DocumentBuilder builder = factory.newDocumentBuilder();
+			// Load the input XML document, parse it and return an instance of the
+			// Document class.
 			
-			private String name;
-			private EPoints eDrawingType; 
-			private Class<?> classShape; // 파라미터로 오니까 물읖표 ?
-			private EShapeTool(String name, EPoints eDrawingType ,Class<?> classShape) {
-				this.name = name;
-				this.eDrawingType = eDrawingType;
-				this.classShape = classShape;
-			}
+			Document document = builder.parse(fileName);
+			document.getDocumentElement().normalize();
 			
-			public String getName() {
-				return this.name;
-			}
-			
-			public EPoints getEPoints() {
-				return this.eDrawingType;
-			}
-			public GShape newShape(){
-				GShape shape;
-				try {
-					shape = (GShape) classShape.getConstructor().newInstance();
-					return shape;
-				} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
-						| InvocationTargetException | NoSuchMethodException | SecurityException e) {
-					e.printStackTrace();
+			NodeList nodeList = document.getDocumentElement().getChildNodes();
+			for (int i=0; i<nodeList.getLength(); i++) {
+				Node node = nodeList.item(i);
+				if (node.getNodeType() == Node.ELEMENT_NODE) {
+					if (node.getNodeName().equals(EMainFrame.class.getSimpleName())) {
+						EMainFrame.setValues(node);
+					} else if (node.getNodeName().equals(EFileMenuItem.class.getSimpleName())) {
+						EFileMenuItem.setValues(node);
+					} 
 				}
-				return null;
-			}
-		} // 값도 있고 순서도 있음 사실상 4개의 객체가 생성됨.
-		
-		public enum EAnchor {
-			eNN(new Cursor(Cursor.N_RESIZE_CURSOR)), 
-			eNE(new Cursor(Cursor.NE_RESIZE_CURSOR)), 
-			eNW(new Cursor(Cursor.NW_RESIZE_CURSOR)), 
-			eSS(new Cursor(Cursor.S_RESIZE_CURSOR)), 
-			eSE(new Cursor(Cursor.SE_RESIZE_CURSOR)), 
-			eSW(new Cursor(Cursor.SW_RESIZE_CURSOR)), 
-			eEE(new Cursor(Cursor.E_RESIZE_CURSOR)), 
-			eWW(new Cursor(Cursor.W_RESIZE_CURSOR)), 
-			eRR(new Cursor(Cursor.HAND_CURSOR)), 
-			eMM(new Cursor(Cursor.MOVE_CURSOR));
-
-			private Cursor cursor;
-			private EAnchor (Cursor cursor) {
-				this.cursor = cursor;
 			}
 			
-			public Cursor getCursor() {
-				return this.cursor;
-			}
+		} catch (ParserConfigurationException e) {
+			e.printStackTrace();
+		} catch (SAXException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}		
+	}
+
+	public enum EMainFrame {
+		eX(0),
+		eY(0),
+		eW(0),
+		eH(0);
+		
+		private int value;
+		
+		private EMainFrame(int value) {
+			this.value = value;
 		}
 		
-		public enum EFileMenuItem{
-			eNew("새 파일","newPanel"),
-			eOpen("열기","open"),
-			eSave("저장","save"),
-			eSaveAs("다른 이름으로 저장", "saveAS"),
-			ePrint("프린트", "print"),
-			eClose("닫기", "close"),
-			eQuit("종료", "quit");
-			
-			
-			private String name;
-			private String methodName;
-			private EFileMenuItem(String name, String methodName) {
-				this.name = name;
-				this.methodName = methodName;
+		public int getValue() {
+			return this.value;
+		}
+		public static void setValues(Node node) {
+			for (EMainFrame eMainFrame: EMainFrame.values()) {
+				Node attribute = node.getAttributes().getNamedItem(eMainFrame.name());
+				eMainFrame.value = Integer.parseInt(attribute.getNodeValue());
+				System.out.println("setted");
 			}
 			
-			public String getName() {
-				return this.name;
-			}
-			
-			public String getMethodName(){
-				return this.methodName;
-			}
 		}
 	}
+	
+	public enum EAnchor {
+		eNN(new Cursor(Cursor.N_RESIZE_CURSOR)),
+		eNE(new Cursor(Cursor.NE_RESIZE_CURSOR)),
+		eNW(new Cursor(Cursor.NW_RESIZE_CURSOR)),
+		eSS(new Cursor(Cursor.S_RESIZE_CURSOR)),
+		eSE(new Cursor(Cursor.SE_RESIZE_CURSOR)),
+		eSW(new Cursor(Cursor.SW_RESIZE_CURSOR)),
+		eEE(new Cursor(Cursor.E_RESIZE_CURSOR)),
+		eWW(new Cursor(Cursor.W_RESIZE_CURSOR)),
+		eRR(new Cursor(Cursor.HAND_CURSOR)),
+		eMM(new Cursor(Cursor.MOVE_CURSOR));		
+		private Cursor cursor;
+		private EAnchor(Cursor cursor) {
+			this.cursor = cursor;
+		}
+		public Cursor getCursor() {
+			return this.cursor;
+		}
+	}
+	
+	public enum EFileMenuItem {
+		eNew(null, null),
+		eOpen(null, null),
+		eSave(null, null),
+		eSaveAs(null, null),
+		ePrint(null, null),
+		eClose(null, null),
+		eQuit(null, null);
+		
+		private String name;
+		private String methodName;
+		private EFileMenuItem(String name, String methodName) {
+			this.name = name;
+			this.methodName = methodName;
+		}
+		public String getName() {
+			return this.name;
+		}
+		public String getMethodName() {
+			return this.methodName;
+		}
+		public static void setValues(Node node) {
+			NodeList nodeList = node.getChildNodes();
+			
+			 for (int i = 0; i < nodeList.getLength(); i++) {
+			        Node child = nodeList.item(i);
+			        if (child.getNodeType() != Node.ELEMENT_NODE) continue;
+			        
+			        String tag = child.getNodeName();
+			        try {
+			            EFileMenuItem item = EFileMenuItem.valueOf(tag);   // enum 매칭
+			            NamedNodeMap attrs = child.getAttributes();
+
+			            Node n = attrs.getNamedItem("name");
+			            Node t = attrs.getNamedItem("methodName");
+
+			            if (n != null) item.name        = n.getNodeValue().trim();
+			            if (t != null) item.methodName = t.getNodeValue().trim();
+			        } catch (IllegalArgumentException ignore) {
+			            // enum에 없는 태그면 무시
+			        }
+			 }
+			 
+		
+			
+		}
+	}
+	
+	public enum EShapeTool {
+		
+		eSelect("select", EPoints.e2P, GRectangle.class),
+		eRectnalge("rectangle", EPoints.e2P, GRectangle.class),
+		eEllipse("ellipse", EPoints.e2P, GEllipse.class),
+		ePolygon("polygon", EPoints.eNP, GPolygon.class);
+		
+		private String name;
+		private EPoints ePoints;
+		private Class<?> classShape;
+		private EShapeTool(String name, EPoints ePoints, Class<?> classShape) {
+			this.name = name;
+			this.ePoints = ePoints;
+			this.classShape = classShape;
+		}
+		public String getName() {
+			return this.name;
+		}
+		public EPoints getEPoints() {
+			return this.ePoints;
+		}
+		public GShape newShape() {
+			try {
+				GShape shape = (GShape) classShape.getConstructor().newInstance();
+				return shape;
+			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+					| InvocationTargetException | NoSuchMethodException | SecurityException e) {
+				e.printStackTrace();
+			}
+			return null;
+		}
+	}	// components
+
+	public static void ensureLoaded() {
+		// TODO Auto-generated method stub
+		
+	}
+	
+
 }

@@ -18,5 +18,6 @@ public class GEditMenu extends JMenu {
 		
 		this.editMenu = new JMenuItem("Redo");
 		this.add(this.editMenu);
+		
 	}
 }

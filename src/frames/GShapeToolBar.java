@@ -7,7 +7,7 @@ import javax.swing.ButtonGroup;
 import javax.swing.JRadioButton;
 import javax.swing.JToolBar;
 
-import global.GConstants.Gmainframe.EShapeTool;
+import global.GConstants.EShapeTool;
 
 public class GShapeToolBar extends JToolBar {
 	private static final long serialVersionUID = 1L;

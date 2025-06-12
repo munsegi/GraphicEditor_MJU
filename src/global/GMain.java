@@ -11,6 +11,5 @@ public class GMain {
 		mainFrame.initialize(); //트리를 한번 더 타고 내려감(two face initialize) - 있는게 좋다
 		//이후에 eventLoop로 빠져 EventHandler가 이벤트를 기다리게 됨.
 		
-
 	}
 }

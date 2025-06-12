@@ -13,8 +13,8 @@ import javax.swing.JPanel;
 
 import Shapes.GPolygon;
 import Shapes.GShape;
-import global.GConstants.Gmainframe.EAnchor;
-import global.GConstants.Gmainframe.EShapeTool;
+import global.GConstants.EAnchor;
+import global.GConstants.EShapeTool;
 import transformer.GDrawer;
 import transformer.GMover;
 import transformer.GResizer;
@@ -61,31 +61,10 @@ public class GDrawingPanel extends JPanel {
 	@Override // 부모가 해야 할 일을 대체함
 	protected void paintComponent(Graphics graphics) {
 		super.paintComponent(graphics); // 본래 부모가 할 일을 호출함. 오버라이딩 공식임.
-		Graphics2D g2 = (Graphics2D) graphics;
 
 		// 저장된 도형 그리기
 		for (GShape shapes : this.shapes) {
-			if (eDrawingState == EDrawingState.eNp && shapes == currentShape) {
-				// 현재 폴리곤은 나중에 미리보기를 따로 그릴 것
-				continue;
-			}
 			shapes.draw((Graphics2D) graphics);
-		}
-
-		// N-Point 모드에서만, 현재 그리는 폴리곤에 한해
-		if (eDrawingState == EDrawingState.eNp && currentShape instanceof GPolygon) {
-			GPolygon poly = (GPolygon) currentShape;
-			int n = poly.getPointCount();
-			if (n > 0 && currentMousePoint != null) {
-				int[] xs = poly.getXPoints();
-				int[] ys = poly.getYPoints();
-				// 저장된 점들끼리 선분 그리기
-				for (int i = 0; i < n - 1; i++) {
-					g2.drawLine(xs[i], ys[i], xs[i + 1], ys[i + 1]);
-				}
-				// 마지막 점 마우스 커서까지 미리보기 선 그리기
-				g2.drawLine(xs[n - 1], ys[n - 1], currentMousePoint.x, currentMousePoint.y);
-			}
 		}
 
 	}
@@ -246,8 +225,7 @@ public class GDrawingPanel extends JPanel {
 			if (eDrawingState == EDrawingState.e2P) {
 				keepTransform(e.getX(), e.getY());
 			} else if (eDrawingState == EDrawingState.eNp) {
-				currentMousePoint = e.getPoint();
-				repaint();
+				keepTransform(e.getX(), e.getY());
 			} else if (eDrawingState == EDrawingState.eIdle) {
 				changeCursor(e.getX(), e.getY());
 			} else {
