@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GConstants>
+	<EMainFrame eX = "200" eY = "100" eW = "800" eH = "600" />
+	<EFileMenuItem  defaultPathName = "c:\\Users\\chois\\OneDrive\\programming\\classess\\classes-201801" >
+		<eNew name = "새로" methodName = "newPanel" /> 
+		<eOpen name = "열기" methodName = "open" />
+		<eSave name = "저장" methodName = "save" />
+		<eSaveAs name = "다른이름으로" methodName = "saveAS" />
+		<eClose name = "닫기" methodName = "close" />
+		<ePrint name = "프린트" methodName = "print" />
+		<eQuit name = "종료" methodName = "quit" />
+	</EFileMenuItem >
+	<EEditMenuItem >
+		<eReDo label = "다시실행" toolTipText = "새로운 파일을 생성" /> 
+		<eUnDo label = "되돌리기" toolTipText = "새로운 파일을 생성" />
+		<eCut label = "오려두기" toolTipText = "새로운 파일을 생성" />
+		<eCopy label = "복사" toolTipText = "새로운 파일을 생성" />
+		<ePaste label = "붙이기" toolTipText = "새로운 파일을 생성" />
+		<eDelete label = "지우기" toolTipText = "새로운 파일을 생성" />
+		<eGroup label = "그룹" toolTipText = "새로운 파일을 생성" />
+		<eUnGroup label = "그룹해제" toolTipText = "새로운 파일을 생성" />
+	</EEditMenuItem >
+	<EGraphicsMenuItem >
+		<eFontStyle label = "글자모양" toolTipText = "새로운 파일을 생성" />
+		<elineStyle label = "라인모양" toolTipText = "새로운 파일을 생성" />
+		<eLineColor label = "라인색" toolTipText = "새로운 파일을 생성" />
+		<eFillColor label = "채우기색" toolTipText = "새로운 파일을 생성" />
+	</EGraphicsMenuItem >
+	<EToolBarButton pathName = "rsc">
+		<eSelect label = "선택도구" toolTipText = "새로운 파일을 생성" imageFileName = "select"/> 
+		<eRectangle label = "네모도구" toolTipText = "새로운 파일을 생성" imageFileName = "rectangle"/>
+		<eEllipse label = "원도구" toolTipText = "새로운 파일을 생성" imageFileName = "ellipse"/>
+		<eEllipse label = "원도구" toolTipText = "새로운 파일을 생성" imageFileName = "ellipse"/>
+		<eLine label = "라인도구" toolTipText = "새로운 파일을 생성" imageFileName = "line"/>
+		<ePolygon label = "다각형도구" toolTipText = "새로운 파일을 생성" imageFileName = "polygon"/>
+		<eTextArea label = "텍스트박스" toolTipText = "새로운 파일을 생성" imageFileName = "textArea"/>
+	</EToolBarButton>	
+</GConstants>

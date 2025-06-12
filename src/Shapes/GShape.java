@@ -9,7 +9,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
 import java.io.Serializable;
 
-import global.GConstants.Gmainframe.EAnchor;
+import global.GConstants.EAnchor;
 
 public abstract class GShape implements Serializable {
 	
@@ -33,6 +33,7 @@ public abstract class GShape implements Serializable {
 
 	
 	public GShape(Shape shape) {
+		
 		this.shape = shape;
 		this.affineTransform = new AffineTransform();
 		this.anchors = new Ellipse2D[EAnchor.values().length - 1];
@@ -106,19 +107,17 @@ public abstract class GShape implements Serializable {
 	}
 
 	public void draw(Graphics2D graphics2D) {
-		Shape transformedShape = this.affineTransform.createTransformedShape(shape);
+		Shape transformedShape = affineTransform.createTransformedShape(shape);
 		graphics2D.draw(transformedShape);
 		if (bSelected) {
 			this.setAnchors();
-			for (int i = 0; i < this.anchors.length; i++) {
-				Shape transformedAnchor = this.affineTransform.createTransformedShape(anchors[i]);
-				Color penColor = graphics2D.getColor();
+			Color pen = graphics2D.getColor();
+			for (Ellipse2D anchor : anchors) {
 				graphics2D.setColor(graphics2D.getBackground());
-				graphics2D.draw(anchors[i]);
-				graphics2D.fill(anchors[i]);
-				graphics2D.setColor(penColor);
-				
-			}
+				graphics2D.fill(anchor);          
+				graphics2D.setColor(pen);
+				graphics2D.draw(anchor);
+	        }
 		}
 	}
 
@@ -135,15 +134,13 @@ public abstract class GShape implements Serializable {
 	}
 
 	public boolean contains(int x, int y) {
-		if (bSelected) {
-			for (int i = 0; i < this.anchors.length; i++) {
-				Shape transformedAnchor = this.affineTransform.createTransformedShape(anchors[i]);
-				if (transformedAnchor.contains(x, y)) {
-					this.eSelectedAnchor = EAnchor.values()[i];
-					return true;
-				}
-			}
-		}
+		for (int i = 0; i < this.anchors.length; i++) {
+	        // 변환을 한 번 더 줄 필요가 없다
+	        if (anchors[i].contains(x, y)) {
+	            this.eSelectedAnchor = EAnchor.values()[i];
+	            return true;
+	        }
+	    }
 		Shape transformed = affineTransform.createTransformedShape(shape);
 		if (transformed.contains(x, y))  {
 			this.eSelectedAnchor = EAnchor.eMM;
@@ -153,8 +150,8 @@ public abstract class GShape implements Serializable {
 	}
 	//현재 변환을 복사해서 돌려줌 
 	public AffineTransform getAffineTransform() {
-	    return (AffineTransform) affineTransform.clone();
-//	    return this.affineTransform;
+//	    return (AffineTransform) affineTransform.clone();
+	    return this.affineTransform;
 	}
 	
 	// 외부에서 변환 전체를 교체할 때 사용 
@@ -164,9 +161,11 @@ public abstract class GShape implements Serializable {
 	
 	//앵커를 기준으로 스케일링
 	public void scale(double sx, double sy, double anchorX, double anchorY) {
+		
 	    affineTransform.translate(anchorX, anchorY); // 원점을 이동시키고
 	    affineTransform.scale(sx, sy); // 변형시킴
 	    affineTransform.translate(-anchorX, -anchorY); // 다시 원상복구
+	    
 	    // sx, sy만 가지고 계산을 할 수 있게 원점을 이동시키는 과정임
 	}
 	

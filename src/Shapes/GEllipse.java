@@ -30,10 +30,12 @@ public class GEllipse extends GShape {
 
     @Override
     public void drag(int x, int y) {
-        double x0 = Math.min(startX, x);
+        
+    	double x0 = Math.min(startX, x);
         double y0 = Math.min(startY, y);
-        double w  = Math.abs(x - startX);
-        double h  = Math.abs(y - startY);
+        double w  = (x - startX);
+        double h  = (y - startY);
+        
         ellipse.setFrame(x0, y0, w, h);
     }
 

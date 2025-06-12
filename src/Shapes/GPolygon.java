@@ -14,22 +14,39 @@ public class GPolygon extends GShape {
 		this.polygon = (Polygon) this.getShape();
 		this.affineTransform = new AffineTransform();
 	}
+	
+	@Override
+    public void setPoint(int x, int y) {   // 첫 클릭
+        polygon.reset();
+        polygon.addPoint(x, y);            // 고정된 첫 점
+        polygon.addPoint(x, y);            // 커서
+    }
 
+    @Override
+    public void addPoint(int x, int y) {   // 단일 클릭(add vertex)
+        int n = polygon.npoints;
+        // 커서 위치를 “확정된 점”으로 대체
+        polygon.xpoints[n-1] = x;
+        polygon.ypoints[n-1] = y;
+        // 그리고 다시 새 placeholder 추가
+        polygon.addPoint(x, y);
+        polygon.invalidate();
+    }
+
+    @Override
+    public void drag(int x, int y) {       // mouseMoved
+        int n = polygon.npoints;
+        if (n == 0) return;
+        polygon.xpoints[n-1] = x;          // 커서 갱신
+        polygon.ypoints[n-1] = y;
+        polygon.invalidate();
+        
+    }
 	@Override
 	public void draw(Graphics2D g2) {
 		super.draw(g2);
 	}
 
-	@Override
-	public void setPoint(int x, int y) {
-		this.polygon.reset();
-		this.polygon.addPoint(x, y);
-	}
-
-	@Override
-	public void addPoint(int x, int y) {
-		this.polygon.addPoint(x, y);
-	}
 
 	public void move(int dx, int dy) {
 		translate(dx,dy);
@@ -55,11 +72,6 @@ public class GPolygon extends GShape {
 		return polygon.ypoints;
 	}
 
-	@Override
-	public void drag(int x, int y) {
-		// TODO Auto-generated method stub
-
-	}
 
 	@Override
 	public void finishPoint(int x, int y) {

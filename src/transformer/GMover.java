@@ -16,16 +16,17 @@ public class GMover extends GTransformer {
     
     @Override
     public void start(Graphics2D graphics, int x, int y) {
+    	
     	this.px = x;
 		this.py = y;
+		
     }
 
     @Override
     public void drag(Graphics2D graphics, int x, int y) {
 		int dx = x - px;
 		int dy = y - py;
-		
-		
+			
 		this.shape.translate(dx, dy); 
 		
 		this.px = x;

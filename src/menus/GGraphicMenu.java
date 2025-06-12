@@ -12,11 +12,15 @@ public class GGraphicMenu extends JMenu {
 		
 		this.graphicMenu = new JMenuItem("Line thickness");
 		this.add(this.graphicMenu);
+		
 		this.graphicMenu = new JMenuItem("Line Style");
 		this.add(this.graphicMenu);
+		
 		this.graphicMenu = new JMenuItem("Font style");
 		this.add(this.graphicMenu);
+		
 		this.graphicMenu = new JMenuItem("Font size");
 		this.add(this.graphicMenu);
+		
 	}
 }

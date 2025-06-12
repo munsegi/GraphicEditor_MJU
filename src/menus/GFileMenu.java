@@ -22,7 +22,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 import Shapes.GShape;
 import frames.GDrawingPanel;
-import global.GConstants.Gmainframe.EFileMenuItem;
+import global.GConstants.EFileMenuItem;
 
 
 public class GFileMenu extends JMenu {
